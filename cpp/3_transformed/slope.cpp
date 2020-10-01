@@ -8,11 +8,10 @@
 #include <iostream>
 #include <string>
 
-
-
 int main(int argc, char *argv[])
 {
-    if (argc < 3) {
+    if (argc < 3)
+    {
         std::cerr << "Usage:\n\tslope dem_file slope_file\n";
         std::exit(1);
     }
@@ -28,8 +27,9 @@ int main(int argc, char *argv[])
     /////////////
 
     GDALDataset *ds;
-    ds = (GDALDataset *) GDALOpen(in_file.c_str(), GA_ReadOnly);
-    if (ds == nullptr) {
+    ds = (GDALDataset *)GDALOpen(in_file.c_str(), GA_ReadOnly);
+    if (ds == nullptr)
+    {
         std::cerr << "Can't open file '" << in_file << "'.\n";
         std::exit(1);
     }
@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
     int ldx = compute_ldx<float>(x_size) * sizeof(float);
 
     GDALRasterBand *band = ds->GetRasterBand(1);
-    if (band->RasterIO(GF_Read, 0, 0, x_size, y_size, dem_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None) {
+    if (band->RasterIO(GF_Read, 0, 0, x_size, y_size, dem_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None)
+    {
         std::cerr << "Cannot read data.\n";
         std::exit(1);
     }
@@ -62,25 +63,28 @@ int main(int argc, char *argv[])
     float *slope_raster = alloc(x_size, y_size, nodata);
     slopeCPU(x_size, y_size, x_cell_size, y_cell_size, dem_raster, slope_raster, ldx);
 
-
     double t3 = now();
     std::cout << "Computing time: " << t3 - t2 << std::endl;
 
-    ///////////////
+    /////////////
     /* Writing */
-    ///////////////
+    /////////////
 
     GDALDriver *driver = ds->GetDriver();
 
     GDALDataset *ds_out = driver->Create(out_file.c_str(), x_size, y_size, 1, GDT_Float32, nullptr);
-    if (ds_out == nullptr) {
+    if (ds_out == nullptr)
+    {
         std::cerr << "Can't create slope file.\n";
         std::exit(1);
     }
+    ds_out->SetGeoTransform(gt);
+    ds_out->SetProjection(proj.c_str());
 
     GDALRasterBand *band_out = ds_out->GetRasterBand(1);
     band_out->SetNoDataValue(nodata);
-    if (band_out->RasterIO(GF_Write, 0, 0, x_size, y_size, slope_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None) {
+    if (band_out->RasterIO(GF_Write, 0, 0, x_size, y_size, slope_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None)
+    {
         std::cerr << "Cannot write data.\n";
         std::exit(1);
     }
@@ -88,8 +92,8 @@ int main(int argc, char *argv[])
     double t4 = now();
     std::cout << "Writing time: " << t4 - t3 << std::endl;
 
+    GDALClose((GDALDatasetH)ds);
+    GDALClose((GDALDatasetH)ds_out);
 
     std::cout << "Total time: " << t4 - t1 << std::endl;
-
-
 }

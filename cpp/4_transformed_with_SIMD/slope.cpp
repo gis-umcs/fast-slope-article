@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
     double t3 = now();
     std::cout << "Computing time: " << t3 - t2 << std::endl;
 
-    ///////////////
+    /////////////
     /* Writing */
-    ///////////////
+    /////////////
 
     GDALDriver *driver = ds->GetDriver();
 
@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
         std::cerr << "Can't create slope file.\n";
         std::exit(1);
     }
+    ds_out->SetGeoTransform(gt);
+    ds_out->SetProjection(proj.c_str());
 
     GDALRasterBand *band_out = ds_out->GetRasterBand(1);
     band_out->SetNoDataValue(nodata);
@@ -89,6 +91,9 @@ int main(int argc, char *argv[])
 
     double t4 = now();
     std::cout << "Writing time: " << t4 - t3 << std::endl;
+
+    GDALClose((GDALDatasetH)ds);
+    GDALClose((GDALDatasetH)ds_out);
 
     std::cout << "Total time: " << t4 - t1 << std::endl;
 }
