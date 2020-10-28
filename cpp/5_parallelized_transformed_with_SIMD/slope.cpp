@@ -43,10 +43,11 @@ int main(int argc, char *argv[])
     int y_size = ds->GetRasterYSize();
 
     float *dem_raster = alloc<float>(x_size, y_size);
-    int ldx = compute_ldx<float>(x_size) * sizeof(float);
+    int ldx = compute_ldx<float>(x_size);
+    int byte_ldx = ldx * sizeof(float);
 
     GDALRasterBand *band = ds->GetRasterBand(1);
-    if (band->RasterIO(GF_Read, 0, 0, x_size, y_size, dem_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None)
+    if (band->RasterIO(GF_Read, 0, 0, x_size, y_size, dem_raster, x_size, y_size, GDT_Float32, 0, byte_ldx) != CE_None)
     {
         std::cerr << "Cannot read data.\n";
         std::exit(1);
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 
     GDALRasterBand *band_out = ds_out->GetRasterBand(1);
     band_out->SetNoDataValue(nodata);
-    if (band_out->RasterIO(GF_Write, 0, 0, x_size, y_size, slope_raster, x_size, y_size, GDT_Float32, 0, ldx) != CE_None)
+    if (band_out->RasterIO(GF_Write, 0, 0, x_size, y_size, slope_raster, x_size, y_size, GDT_Float32, 0, byte_ldx) != CE_None)
     {
         std::cerr << "Cannot write data.\n";
         std::exit(1);
